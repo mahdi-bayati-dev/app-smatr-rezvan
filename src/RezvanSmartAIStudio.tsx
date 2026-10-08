@@ -30,14 +30,14 @@ import bicyclePhoto from "./assets/persona/bicycle.jpg";
 // ============================================================================
 
 // عکس پروفایل پدرام محمدی (آواتار اصلی پرسونا - مرحله ۱)
-const AVATAR_IMAGE_URL = avatarPhoto;
+const AVATAR_IMAGE_URL = portraitPhoto;
 
 // عکس گالری مرحله ۲ (تصویر اداری/محل کار)
-const GALLERY_STEP2_IMAGE_URL = portraitPhoto;
+const GALLERY_STEP2_IMAGE_URL = bicyclePhoto;
 
 // تصاویر پست اینستاگرام مرحله ۳ (دو تصویر پرسنلی/محتوایی)
 const GALLERY_STEP3_IMAGE_URL_1 = cafePhoto;
-const GALLERY_STEP3_IMAGE_URL_2 = bicyclePhoto;
+const GALLERY_STEP3_IMAGE_URL_2 = avatarPhoto;
 
 // ============================================================================
 // دیتای ثابت پروژه (مقادیر نمایشی سایدبار)
@@ -97,6 +97,8 @@ export default function RezvanSmartAIStudio() {
   // ----------------------------------------------------------------------
   const runStep = useCallback((targetStep: number) => {
     setIsThinking(true);
+    // مرحله ۳ به دلیل ساخت تسک‌ها و عکس‌های متعدد، زمان بیشتری نیاز دارد
+    const stepDelay = targetStep === 3 ? 4200 : 1800;
     setTimeout(() => {
       if (targetStep === 1) {
         setPersona((p) => ({
@@ -151,7 +153,7 @@ rezvan_agent.sync_channels(
       }
       setDemoStep(targetStep);
       setIsThinking(false);
-    }, 2200);
+    }, stepDelay);
   }, []);
 
   const handleSubmitPrompt = useCallback(() => {
@@ -345,15 +347,28 @@ rezvan_agent.sync_channels(
               <p className="mb-2 text-xs font-medium text-slate-500">پروفایل</p>
               <div className="flex flex-col items-center gap-2 text-center">
                 <div className="relative">
-                  <div className="h-14 w-14 overflow-hidden rounded-full border-2 border-[#2e3138] bg-[#1e1f24]">
+                  <button
+                    type="button"
+                    aria-label="مشاهده تصویر پروفایل"
+                    disabled={!persona.avatar}
+                    onClick={() =>
+                      persona.avatar &&
+                      setLightboxItem({
+                        url: persona.avatar,
+                        label: persona.name || "تصویر پروفایل",
+                        tag: "پروفایل اصلی",
+                      })
+                    }
+                    className="group h-24 w-24 overflow-hidden rounded-full border-2 border-[#2e3138] bg-[#1e1f24] transition-transform duration-300 enabled:cursor-zoom-in enabled:hover:scale-105 enabled:hover:border-[#9B72CB]"
+                  >
                     {persona.avatar && (
                       <img
                         src={persona.avatar}
                         alt="آواتار پرسونا"
-                        className="h-full w-full animate-[popIn_0.5s_cubic-bezier(0.34,1.56,0.64,1)] object-cover"
+                        className="h-full w-full animate-[popIn_0.5s_cubic-bezier(0.34,1.56,0.64,1)] object-cover transition-transform duration-300 group-hover:scale-110"
                       />
                     )}
-                  </div>
+                  </button>
                   {persona.avatar && (
                     <span className="absolute bottom-0 left-0 h-3 w-3 rounded-full border-2 border-[#131316] bg-emerald-400" />
                   )}
@@ -501,39 +516,39 @@ rezvan_agent.sync_channels(
         {/* ============================================================ */}
         <div className="flex-shrink-0 border-t border-[#2e3138] bg-[#131316]/90 px-6 py-4 backdrop-blur-sm">
           <div className="mx-auto max-w-3xl">
-            {/* کپسول ورودی */}
-            <div className="relative">
-              {/* هاله نورانی محو بیرونی (فقط هنگام پردازش) */}
+            {/* کپسول ورودی با هاله شناور سبک Gemini */}
+            <div className="group relative">
+              {/* لایه ۱: هاله نورانی شناور بیرونی */}
               <div
-                className="pointer-events-none absolute -inset-4 rounded-[32px] blur-2xl transition-opacity duration-700"
+                className={`pointer-events-none absolute -inset-0.75 rounded-2xl blur-lg transition-opacity duration-700 ${
+                  isThinking
+                    ? "opacity-80"
+                    : "opacity-0 group-focus-within:opacity-30"
+                }`}
                 style={{
                   background:
-                    "conic-gradient(from 0deg, #4285F4, #9B72CB, #D96570, #F4B400, #4285F4)",
-                  opacity: isThinking ? 0.55 : 0,
-                  animation: "spinBorder 4s linear infinite",
+                    "linear-gradient(90deg, #4285F4, #9B72CB, #D96570, #F4B400, #4285F4)",
+                  backgroundSize: "300% 300%",
+                  animation: isThinking
+                    ? "geminiStream 3s ease infinite, geminiPulse 2.2s ease-in-out infinite"
+                    : "none",
                 }}
               />
 
+              {/* لایه ۲: مرز گرادیانی باریک و پرجلا */}
               <div
-                className="relative overflow-hidden rounded-2xl p-[2.5px] transition-colors duration-300"
+                className="relative rounded-2xl p-[1.5px] transition-all duration-300"
                 style={{
+                  background: isThinking
+                    ? "linear-gradient(90deg, #4285F4, #9B72CB, #D96570, #F4B400, #4285F4)"
+                    : "#2e3138",
+                  backgroundSize: isThinking ? "300% 300%" : "auto",
                   animation: isThinking
-                    ? "pulseGlow 2.6s ease-in-out infinite, capsuleBreathe 2.6s ease-in-out infinite"
+                    ? "geminiStream 3s ease infinite"
                     : "none",
                 }}
               >
-                <div
-                  className="absolute left-1/2 top-1/2 aspect-square w-[220%] -translate-x-1/2 -translate-y-1/2 transition-opacity duration-500"
-                  style={{
-                    background:
-                      "conic-gradient(from 0deg, #4285F4, #9B72CB, #D96570, #F4B400, #4285F4)",
-                    opacity: isThinking ? 1 : inputValue ? 0.6 : 0.22,
-                    animation: isThinking
-                      ? "spinBorder 2.2s linear infinite"
-                      : "spinBorder 9s linear infinite",
-                  }}
-                />
-                <div className="relative flex items-center gap-2 rounded-[14px] border border-[#2e3138] bg-[#1e1f24] px-3 py-2 shadow-lg shadow-black/20 transition-all duration-300 focus-within:border-[#9B72CB] focus-within:shadow-[#9B72CB]/10">
+                <div className="relative z-10 flex items-center gap-2 rounded-[14.5px] bg-[#1e1f24] px-3 py-2 shadow-lg shadow-black/20 transition-all duration-300 focus-within:shadow-[#9B72CB]/10">
                   <button className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-[#282a30] hover:text-slate-200">
                     <Plus className="h-4 w-4" />
                   </button>
@@ -586,16 +601,14 @@ rezvan_agent.sync_channels(
           60% { opacity: 1; transform: scale(1.04) translateY(-1px); }
           100% { opacity: 1; transform: scale(1) translateY(0); }
         }
-        @keyframes spinBorder {
-          to { transform: rotate(360deg); }
+        @keyframes geminiStream {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
         }
-        @keyframes pulseGlow {
-          0%, 100% { box-shadow: 0 0 0px 0px rgba(155, 114, 203, 0); }
-          50% { box-shadow: 0 0 24px 4px rgba(155, 114, 203, 0.45); }
-        }
-        @keyframes capsuleBreathe {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.012); }
+        @keyframes geminiPulse {
+          0%, 100% { opacity: 0.5; transform: scale(0.998); }
+          50% { opacity: 0.9; transform: scale(1.004); }
         }
         @keyframes dotBounce {
           0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
