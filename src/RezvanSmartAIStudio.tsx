@@ -97,8 +97,12 @@ export default function RezvanSmartAIStudio() {
   // ----------------------------------------------------------------------
   const runStep = useCallback((targetStep: number) => {
     setIsThinking(true);
-    // مرحله ۳ به دلیل ساخت تسک‌ها و عکس‌های متعدد، زمان بیشتری نیاز دارد
-    const stepDelay = targetStep === 3 ? 4200 : 1800;
+    const stepDelays: Record<number, number> = {
+      1: 3200,
+      2: 3500,
+      3: 5800,
+    };
+    const stepDelay = stepDelays[targetStep] ?? 3500;
     setTimeout(() => {
       if (targetStep === 1) {
         setPersona((p) => ({
