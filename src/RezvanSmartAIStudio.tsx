@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import type { ComponentType, KeyboardEvent } from "react";
 import {
   Sparkles,
@@ -14,10 +14,10 @@ import {
   CornerDownLeft,
   RotateCcw,
   ChevronDown,
-  CheckCircle2,
   Terminal,
   Circle,
   Gauge,
+  X,
 } from "lucide-react";
 
 import avatarPhoto from "./assets/persona/avatar.jpg";
@@ -44,7 +44,7 @@ const GALLERY_STEP3_IMAGE_URL_2 = bicyclePhoto;
 // ============================================================================
 
 const PROJECTS = [
-  { name: "پرسونا پدرام محمدی", active: true },
+  { name: "پروژه جدید", active: true },
   { name: "کمپین نوروز ۱۴۰۵", active: false },
   { name: "آواتار پشتیبانی VIP", active: false },
   { name: "تولید محتوای اینستاگرام", active: false },
@@ -77,11 +77,20 @@ export default function RezvanSmartAIStudio() {
   const [persona, setPersona] = useState(EMPTY_PERSONA);
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [completion, setCompletion] = useState(0);
   const [isThinking, setIsThinking] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [syncedMessage, setSyncedMessage] = useState(false);
+  const [lightboxItem, setLightboxItem] = useState<GalleryItem | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!lightboxItem) return;
+    const onKeyDown = (e: globalThis.KeyboardEvent) => {
+      if (e.key === "Escape") setLightboxItem(null);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [lightboxItem]);
 
   // ----------------------------------------------------------------------
   // موتور مراحل دمو: اجرای هر مرحله با شبیه‌سازی لودینگ هوش مصنوعی
@@ -94,11 +103,9 @@ export default function RezvanSmartAIStudio() {
           ...p,
           avatar: AVATAR_IMAGE_URL,
           name: "پدرام محمدی",
-          role: "مهندسی فناوری اطلاعات (IT Engineer)",
+          role: "مهندسی فناوری اطلاعات",
           bio: "متخصص ارشد زیرساخت و دواپس، علاقه‌مند به هوش مصنوعی و خودکارسازی فرآیندها.",
-          phone: "۰۹۱۲۳۴۵۶۷۸۹",
         }));
-        setCompletion(40);
       } else if (targetStep === 2) {
         setGallery((g) => [
           ...g,
@@ -108,13 +115,10 @@ export default function RezvanSmartAIStudio() {
             tag: "پروفایل",
           },
         ]);
-        setPersona((p) => ({ ...p, telegram: "@pedram_dev" }));
-        setCompletion(70);
       } else if (targetStep === 3) {
         setPersona((p) => ({
           ...p,
           instagram: "@pedram.mohammadi_it",
-          rubika: "@pedram_it",
         }));
         setGallery((g) => [
           ...g,
@@ -143,12 +147,11 @@ rezvan_agent.sync_channels(
 # Status: Active & Monitoring`,
           },
         ]);
-        setCompletion(100);
         setSyncedMessage(true);
       }
       setDemoStep(targetStep);
       setIsThinking(false);
-    }, 800);
+    }, 2200);
   }, []);
 
   const handleSubmitPrompt = useCallback(() => {
@@ -170,16 +173,16 @@ rezvan_agent.sync_channels(
     setPersona(EMPTY_PERSONA);
     setGallery([]);
     setTasks([]);
-    setCompletion(0);
     setIsThinking(false);
     setInputValue("");
     setSyncedMessage(false);
+    setLightboxItem(null);
   };
 
   return (
     <div
       dir="rtl"
-      className="flex h-screen w-full overflow-hidden bg-[#0e0e11] text-slate-200 font-sans"
+      className="flex h-screen w-full overflow-hidden bg-[#0e0e11] text-slate-200 font-sans transition-colors duration-500"
       style={{ fontFamily: "'Vazirmatn', 'IRANSans', system-ui, sans-serif" }}
     >
       {/* ================================================================ */}
@@ -213,7 +216,9 @@ rezvan_agent.sync_channels(
               >
                 <Circle
                   className={`h-2 w-2 flex-shrink-0 ${
-                    proj.active ? "fill-[#4285F4] text-[#4285F4]" : "fill-slate-600 text-slate-600"
+                    proj.active
+                      ? "fill-[#4285F4] text-[#4285F4]"
+                      : "fill-slate-600 text-slate-600"
                   }`}
                 />
                 <span className="truncate">
@@ -289,42 +294,28 @@ rezvan_agent.sync_channels(
 
         {/* بدنه اصلی (بدون اسکرول - کل محتوا در ۱۰۰vh جای می‌گیرد) */}
         <div className="grid flex-1 grid-rows-[auto_auto_auto_1fr] gap-3 overflow-hidden px-6 py-4">
-          {/* پیام موفقیت همگام‌سازی (ارتفاع ثابت برای جلوگیری از جابجایی چیدمان) */}
+          {/* نشانگر همگام‌سازی گسسته (ارتفاع ثابت برای جلوگیری از جابجایی چیدمان) */}
           <div className="h-10">
             {syncedMessage && (
-              <div className="animate-[fadeIn_0.4s_ease] flex h-10 items-center gap-3 rounded-xl border border-[#9B72CB]/40 bg-gradient-to-l from-emerald-500/10 via-[#9B72CB]/10 to-[#4285F4]/10 px-4">
-                <CheckCircle2 className="h-5 w-5 flex-shrink-0 text-emerald-400" />
-                <span className="text-sm font-medium text-slate-100">
-                  پرسونا با موفقیت همگام‌سازی شد
+              <div className="animate-[fadeIn_0.4s_ease] flex h-10 items-center gap-3 rounded-xl border border-[#2e3138] bg-[#131316] px-4">
+                <span className="relative flex h-2 w-2 flex-shrink-0">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+                </span>
+                <span className="text-sm font-medium text-slate-300">
+                  کانال‌های اجتماعی در حال همگام‌سازی زنده
                 </span>
               </div>
             )}
           </div>
 
-          {/* متریک‌ها: درصد تکمیل + دقت AI */}
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div className="rounded-xl border border-[#2e3138] bg-[#131316] p-3">
-              <div className="mb-2 flex items-center justify-between">
-                <span className="text-xs text-slate-400">
-                  تکمیل پرسونا (Profile Completion)
-                </span>
-                <span className="text-sm font-bold text-slate-100">
-                  {completion}%
-                </span>
-              </div>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-[#282a30]">
-                <div
-                  className="h-full rounded-full bg-gradient-to-l from-[#4285F4] via-[#9B72CB] to-[#D96570] transition-all duration-700 ease-out"
-                  style={{ width: `${completion}%` }}
-                />
-              </div>
-            </div>
-
+          {/* متریک: شاخص اصالت و طبیعی‌بودن */}
+          <div className="grid grid-cols-1 gap-3">
             <div className="rounded-xl border border-[#2e3138] bg-[#131316] p-3">
               <div className="mb-2 flex items-center justify-between">
                 <span className="flex items-center gap-1.5 text-xs text-slate-400">
                   <Gauge className="h-3.5 w-3.5" />
-                  دقت تشخیص AI
+                  شاخص اصالت و طبیعی‌بودن (Realism Index)
                 </span>
                 <span className="text-sm font-bold text-slate-100">
                   {demoStep === 0 ? "—" : `${92 + demoStep * 2}%`}
@@ -333,7 +324,9 @@ rezvan_agent.sync_channels(
               <div className="h-2 w-full overflow-hidden rounded-full bg-[#282a30]">
                 <div
                   className="h-full rounded-full bg-emerald-500/70 transition-all duration-700 ease-out"
-                  style={{ width: demoStep === 0 ? "0%" : `${92 + demoStep * 2}%` }}
+                  style={{
+                    width: demoStep === 0 ? "0%" : `${92 + demoStep * 2}%`,
+                  }}
                 />
               </div>
             </div>
@@ -349,9 +342,7 @@ rezvan_agent.sync_channels(
                   : "pointer-events-none scale-95 opacity-0"
               }`}
             >
-              <p className="mb-2 text-xs font-medium text-slate-500">
-                پروفایل
-              </p>
+              <p className="mb-2 text-xs font-medium text-slate-500">پروفایل</p>
               <div className="flex flex-col items-center gap-2 text-center">
                 <div className="relative">
                   <div className="h-14 w-14 overflow-hidden rounded-full border-2 border-[#2e3138] bg-[#1e1f24]">
@@ -405,6 +396,7 @@ rezvan_agent.sync_channels(
                 label="تلگرام"
                 value={persona.telegram}
                 gradient="from-[#4285F4] to-[#2b6fe0]"
+                alwaysVisible={demoStep >= 3}
               />
               <ContactCard
                 icon={RubikaBadge}
@@ -412,12 +404,14 @@ rezvan_agent.sync_channels(
                 value={persona.rubika}
                 gradient="from-[#9B72CB] to-[#6a4a9b]"
                 isCustomIcon
+                alwaysVisible={demoStep >= 3}
               />
               <ContactCard
                 icon={Phone}
                 label="شماره تماس"
                 value={persona.phone}
                 gradient="from-emerald-500 to-emerald-700"
+                alwaysVisible={demoStep >= 3}
               />
             </div>
           </div>
@@ -460,7 +454,7 @@ rezvan_agent.sync_channels(
                       dir="ltr"
                       className="overflow-x-auto whitespace-pre-wrap text-left text-emerald-300/90"
                     >
-{task.code}
+                      {task.code}
                     </pre>
                   </div>
                 ))}
@@ -480,9 +474,11 @@ rezvan_agent.sync_channels(
               </p>
               <div className="grid min-h-0 flex-1 grid-cols-4 gap-2 overflow-hidden">
                 {gallery.map((item, idx) => (
-                  <div
+                  <button
                     key={idx}
-                    className="group relative animate-[popIn_0.5s_cubic-bezier(0.34,1.56,0.64,1)] overflow-hidden rounded-lg border border-[#2e3138]"
+                    type="button"
+                    onClick={() => setLightboxItem(item)}
+                    className="group relative animate-[popIn_0.5s_cubic-bezier(0.34,1.56,0.64,1)] overflow-hidden rounded-lg border border-[#2e3138] cursor-zoom-in"
                   >
                     <img
                       src={item.url}
@@ -493,7 +489,7 @@ rezvan_agent.sync_channels(
                     <span className="absolute bottom-1.5 right-1.5 rounded-full bg-black/70 px-2 py-0.5 text-[10px] text-slate-200 backdrop-blur-sm">
                       {item.tag}
                     </span>
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
@@ -506,53 +502,73 @@ rezvan_agent.sync_channels(
         <div className="flex-shrink-0 border-t border-[#2e3138] bg-[#131316]/90 px-6 py-4 backdrop-blur-sm">
           <div className="mx-auto max-w-3xl">
             {/* کپسول ورودی */}
-            <div className="relative rounded-2xl p-[2px]">
-              {isThinking && (
+            <div className="relative">
+              {/* هاله نورانی محو بیرونی (فقط هنگام پردازش) */}
+              <div
+                className="pointer-events-none absolute -inset-4 rounded-[32px] blur-2xl transition-opacity duration-700"
+                style={{
+                  background:
+                    "conic-gradient(from 0deg, #4285F4, #9B72CB, #D96570, #F4B400, #4285F4)",
+                  opacity: isThinking ? 0.55 : 0,
+                  animation: "spinBorder 4s linear infinite",
+                }}
+              />
+
+              <div
+                className="relative overflow-hidden rounded-2xl p-[2.5px] transition-colors duration-300"
+                style={{
+                  animation: isThinking
+                    ? "pulseGlow 2.6s ease-in-out infinite, capsuleBreathe 2.6s ease-in-out infinite"
+                    : "none",
+                }}
+              >
                 <div
-                  className="absolute inset-0 rounded-2xl"
+                  className="absolute left-1/2 top-1/2 aspect-square w-[220%] -translate-x-1/2 -translate-y-1/2 transition-opacity duration-500"
                   style={{
                     background:
-                      "conic-gradient(from 0deg, #4285F4, #9B72CB, #D96570, #4285F4)",
-                    animation:
-                      "spinBorder 3s linear infinite, pulseGlow 3s ease-in-out infinite",
+                      "conic-gradient(from 0deg, #4285F4, #9B72CB, #D96570, #F4B400, #4285F4)",
+                    opacity: isThinking ? 1 : inputValue ? 0.6 : 0.22,
+                    animation: isThinking
+                      ? "spinBorder 2.2s linear infinite"
+                      : "spinBorder 9s linear infinite",
                   }}
                 />
-              )}
-              <div className="relative flex items-center gap-2 rounded-[14px] border border-[#2e3138] bg-[#1e1f24] px-3 py-2 shadow-lg shadow-black/20 transition-all duration-200 focus-within:border-[#9B72CB] focus-within:shadow-[#9B72CB]/10">
-                <button className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-[#282a30] hover:text-slate-200">
-                  <Plus className="h-4 w-4" />
-                </button>
+                <div className="relative flex items-center gap-2 rounded-[14px] border border-[#2e3138] bg-[#1e1f24] px-3 py-2 shadow-lg shadow-black/20 transition-all duration-300 focus-within:border-[#9B72CB] focus-within:shadow-[#9B72CB]/10">
+                  <button className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-[#282a30] hover:text-slate-200">
+                    <Plus className="h-4 w-4" />
+                  </button>
 
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={isThinking ? "" : inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  disabled={isThinking || demoStep >= 3}
-                  placeholder={
-                    isThinking
-                      ? "در حال پردازش توسط هوش مصنوعی..."
-                      : demoStep >= 3
-                      ? "پرسونا تکمیل شد — برای شروع دوباره Reset Demo را بزنید"
-                      : "دستور بعدی را بنویسید یا از چیپ‌های بالا استفاده کنید..."
-                  }
-                  className="flex-1 bg-transparent text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none disabled:cursor-not-allowed"
-                />
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={isThinking ? "" : inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    disabled={isThinking || demoStep >= 3}
+                    placeholder={
+                      isThinking
+                        ? "در حال پردازش توسط هوش مصنوعی..."
+                        : demoStep >= 3
+                          ? "دستور بعدی را بنویسید یا برای شروع مجدد Reset Demo را بزنید..."
+                          : "دستور بعدی را بنویسید یا از چیپ‌های بالا استفاده کنید..."
+                    }
+                    className="flex-1 bg-transparent text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none disabled:cursor-not-allowed"
+                  />
 
-                {isThinking && <ThinkingDots />}
+                  {isThinking && <ThinkingDots />}
 
-                <button className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-[#282a30] hover:text-slate-200">
-                  <Mic className="h-4 w-4" />
-                </button>
+                  <button className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-[#282a30] hover:text-slate-200">
+                    <Mic className="h-4 w-4" />
+                  </button>
 
-                <button
-                  onClick={handleSubmitPrompt}
-                  disabled={isThinking || demoStep >= 3}
-                  className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#4285F4] via-[#9B72CB] to-[#D96570] text-white transition-transform duration-150 hover:scale-105 disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  <CornerDownLeft className="h-4 w-4" />
-                </button>
+                  <button
+                    onClick={handleSubmitPrompt}
+                    disabled={isThinking || demoStep >= 3}
+                    className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#4285F4] via-[#9B72CB] to-[#D96570] text-white transition-transform duration-150 hover:scale-105 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    <CornerDownLeft className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -575,13 +591,64 @@ rezvan_agent.sync_channels(
         }
         @keyframes pulseGlow {
           0%, 100% { box-shadow: 0 0 0px 0px rgba(155, 114, 203, 0); }
-          50% { box-shadow: 0 0 18px 2px rgba(155, 114, 203, 0.35); }
+          50% { box-shadow: 0 0 24px 4px rgba(155, 114, 203, 0.45); }
+        }
+        @keyframes capsuleBreathe {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.012); }
         }
         @keyframes dotBounce {
           0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
           40% { transform: translateY(-5px); opacity: 1; }
         }
+        @keyframes lightboxFadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes lightboxScaleIn {
+          from { opacity: 0; transform: scale(0.9); }
+          to { opacity: 1; transform: scale(1); }
+        }
       `}</style>
+
+      {/* لایت‌باکس نمایش تمام‌صفحه تصویر گالری */}
+      {lightboxItem && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-6 backdrop-blur-sm"
+          style={{ animation: "lightboxFadeIn 0.2s ease-out" }}
+          onClick={() => setLightboxItem(null)}
+        >
+          <div
+            className="relative max-h-full max-w-3xl"
+            style={{
+              animation: "lightboxScaleIn 0.25s cubic-bezier(0.34,1.56,0.64,1)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setLightboxItem(null)}
+              title="بستن"
+              className="absolute -top-3 -left-3 flex h-8 w-8 items-center justify-center rounded-full border border-[#2e3138] bg-[#1e1f24] text-slate-300 transition-colors hover:border-[#D96570]/60 hover:text-[#D96570]"
+            >
+              <X className="h-4 w-4" />
+            </button>
+            <img
+              src={lightboxItem.url}
+              alt={lightboxItem.label}
+              className="max-h-[80vh] w-full rounded-xl border border-[#2e3138] object-contain"
+            />
+            <div className="absolute inset-x-0 bottom-0 flex items-center justify-between rounded-b-xl bg-gradient-to-t from-black/80 to-transparent px-4 py-3">
+              <span className="text-sm font-medium text-slate-100">
+                {lightboxItem.label}
+              </span>
+              <span className="rounded-full bg-black/60 px-2 py-0.5 text-[11px] text-slate-200 backdrop-blur-sm">
+                {lightboxItem.tag}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -608,28 +675,36 @@ type ContactCardProps = {
   value: string;
   gradient: string;
   isCustomIcon?: boolean;
+  alwaysVisible?: boolean;
 };
 
-function ContactCard({ icon: Icon, label, value, gradient, isCustomIcon }: ContactCardProps) {
+function ContactCard({
+  icon: Icon,
+  label,
+  value,
+  gradient,
+  isCustomIcon,
+  alwaysVisible,
+}: ContactCardProps) {
   return (
     <div
       className={`rounded-xl border border-[#2e3138] bg-[#131316] p-4 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:border-[#3a3d45] ${
-        value
+        value || alwaysVisible
           ? "scale-100 opacity-100"
           : "pointer-events-none scale-90 opacity-0"
       }`}
     >
       <div
-        className={`mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br ${gradient}`}
+        className={`mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br ${gradient} ${
+          value ? "" : "opacity-50"
+        }`}
       >
-        {isCustomIcon ? (
-          <Icon />
-        ) : (
-          <Icon className="h-4 w-4 text-white" />
-        )}
+        {isCustomIcon ? <Icon /> : <Icon className="h-4 w-4 text-white" />}
       </div>
       <p className="mb-1 text-xs text-slate-500">{label}</p>
-      <p className="truncate text-sm font-medium text-slate-100">{value}</p>
+      <p className="truncate text-sm font-medium text-slate-100">
+        {value || "—"}
+      </p>
     </div>
   );
 }
