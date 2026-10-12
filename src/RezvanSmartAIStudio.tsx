@@ -117,8 +117,8 @@ export default function RezvanSmartAIStudio() {
           ...g,
           {
             url: GALLERY_STEP2_IMAGE_URL,
-            label: "تصویر اداری/محل کار",
-            tag: "پروفایل",
+            label: "عکس-۱",
+            tag: "عکس-۱",
           },
         ]);
       } else if (targetStep === 3) {
@@ -145,6 +145,34 @@ export default function RezvanSmartAIStudio() {
             title: "Auto-Sync Social Channels",
             status: "COMPLETED",
             code: `# Task: Auto-Sync Social Channels
+rezvan_agent.sync_channels(
+    platforms=['instagram', 'telegram', 'rubika'],
+    persona='pedram_mohammadi',
+    schedule='daily_10am'
+)
+# Status: Active & Monitoring
+# Task: Auto-Sync Social Channels
+rezvan_agent.sync_channels(
+    platforms=['instagram', 'telegram', 'rubika'],
+    persona='pedram_mohammadi',
+    schedule='daily_10am'
+)
+# Status: Active & Monitoring
+# Task: Auto-Sync Social Channels
+rezvan_agent.sync_channels(
+    platforms=['instagram', 'telegram', 'rubika'],
+    persona='pedram_mohammadi',
+    schedule='daily_10am'
+)
+# Status: Active & Monitoring
+# Task: Auto-Sync Social Channels
+rezvan_agent.sync_channels(
+    platforms=['instagram', 'telegram', 'rubika'],
+    persona='pedram_mohammadi',
+    schedule='daily_10am'
+)
+# Status: Active & Monitoring
+# Task: Auto-Sync Social Channels
 rezvan_agent.sync_channels(
     platforms=['instagram', 'telegram', 'rubika'],
     persona='pedram_mohammadi',
@@ -449,8 +477,8 @@ rezvan_agent.sync_channels(
                 <Terminal className="h-3.5 w-3.5" />
                 تسک‌ها و اسکریپت‌های اجرایی
               </p>
-              <div className="min-h-0 flex-1 overflow-hidden rounded-lg border border-[#2e3138] bg-[#0a0a0c] p-3 font-mono text-[12px]">
-                <div className="mb-2 flex items-center gap-1.5 border-b border-[#2e3138] pb-2">
+              <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-[#2e3138] bg-[#0a0a0c] p-3 font-mono text-[12px]">
+                <div className="mb-2 flex flex-shrink-0 items-center gap-1.5 border-b border-[#2e3138] pb-2">
                   <span className="h-2.5 w-2.5 rounded-full bg-[#D96570]/70" />
                   <span className="h-2.5 w-2.5 rounded-full bg-amber-500/60" />
                   <span className="h-2.5 w-2.5 rounded-full bg-emerald-500/70" />
@@ -458,25 +486,27 @@ rezvan_agent.sync_channels(
                     rezvan_agent_runner.py
                   </span>
                 </div>
-                {tasks.map((task, idx) => (
-                  <div
-                    key={idx}
-                    className="animate-[popIn_0.5s_cubic-bezier(0.34,1.56,0.64,1)] space-y-2"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-slate-300">{task.title}</span>
-                      <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold text-emerald-400">
-                        {task.status}
-                      </span>
-                    </div>
-                    <pre
-                      dir="ltr"
-                      className="overflow-x-auto whitespace-pre-wrap text-left text-emerald-300/90"
+                <div className="min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
+                  {tasks.map((task, idx) => (
+                    <div
+                      key={idx}
+                      className="animate-[popIn_0.5s_cubic-bezier(0.34,1.56,0.64,1)] space-y-2"
                     >
-                      {task.code}
-                    </pre>
-                  </div>
-                ))}
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-300">{task.title}</span>
+                        <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold text-emerald-400">
+                          {task.status}
+                        </span>
+                      </div>
+                      <pre
+                        dir="ltr"
+                        className="overflow-x-auto whitespace-pre-wrap text-left text-emerald-300/90"
+                      >
+                        {task.code}
+                      </pre>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
